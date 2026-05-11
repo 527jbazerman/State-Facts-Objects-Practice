@@ -1,36 +1,72 @@
-let stateList = document.getElementById("state-list");
+let positionFilter = document.getElementById("position-filter");
+let cardsContainer = document.getElementById("cards-container");
 
-stateList.onchange = function () {
-  let selected = this.value;
+function renderCards(category = "") {
+  cardsContainer.innerHTML = "";
   
-  document.getElementById("info-pic").src = "img/" + selected + ".jpg";
+  Object.keys(stateData).forEach((key) => {
+    const position = stateData[key];
+    
+    if (!category || position.positionType === category) {
+      const card = document.createElement("div");
+      card.className = "position-card";
+      card.innerHTML = `
+        <img src="${position.image}" alt="${position.name}" class="card-image">
+        <div class="card-content">
+          <h2>${position.name}</h2>
+          <p><strong>Height:</strong> ${position.averageHeight}</p>
+          <p><strong>Weight:</strong> ${position.averageWeight}</p>
+          <p><strong>Role:</strong> ${position.whatTheyDo}</p>
+          <p><strong>Notes:</strong> ${position.notes}</p>
+          <button class="goat-button" data-position="${key}">See The GOAT</button>
+        </div>
+      `;
+      cardsContainer.appendChild(card);
+    }
+  });
   
-  document.getElementById("info-pic").alt = stateData[selected].name;
+  // Add event listeners to all GOAT buttons
+  document.querySelectorAll(".goat-button").forEach((button) => {
+    button.addEventListener("click", openGoatModal);
+  });
+}
+
+function openGoatModal(event) {
+  const positionKey = event.target.getAttribute("data-position");
+  const position = stateData[positionKey];
   
-  document.getElementById("info-name").textContent = stateData[selected].name;
+  const modal = document.getElementById("goat-modal");
+  const modalContent = document.querySelector(".modal-body");
   
-  document.getElementById("info-abbreviation").textContent =
-    stateData[selected].abbr;
+  modalContent.innerHTML = `
+    <h2>${position.name}</h2>
+    <p class="goat-label">GREATEST OF ALL TIME</p>
+    <p class="goat-name">${position.goat}</p>
+    <img src="${position.goatImage}" alt="${position.goat}" class="modal-image">
+  `;
+  
+  modal.style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
 
-  document.getElementById("info-capitol").textContent =
-    stateData[selected].capitol;
+function closeGoatModal() {
+  const modal = document.getElementById("goat-modal");
+  modal.style.display = "none";
+  document.body.style.overflow = "auto";
+}
 
-  document.getElementById("info-population").textContent =
-    stateData[selected].pop;
+// Close modal when clicking outside of it
+document.addEventListener("DOMContentLoaded", function() {
+  const modal = document.getElementById("goat-modal");
+  window.addEventListener("click", function(event) {
+    if (event.target === modal) {
+      closeGoatModal();
+    }
+  });
+});
 
-  document.getElementById("info-statehood").textContent =
-    stateData[selected].statehood;
-
-  document.getElementById("info-mammal").textContent =
-    stateData[selected].mammal;
-
-  document.getElementById("info-bird").textContent = stateData[selected].bird;
-
-  document.getElementById("info-tree").textContent = stateData[selected].tree;
-
-  document.getElementById("info-flower").textContent =
-    stateData[selected].flower;
-
-  document.getElementById("info-nickname").textContent =
-    stateData[selected].nickname;
+positionFilter.onchange = function () {
+  renderCards(this.value);
 };
+
+renderCards("");
