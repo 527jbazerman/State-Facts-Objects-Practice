@@ -1,12 +1,13 @@
-let positionFilter = document.getElementById("position-filter");
-let cardsContainer = document.getElementById("cards-container");
+const positionFilter = document.getElementById("position-filter");
+const cardsContainer = document.getElementById("cards-container");
 
 function renderCards(category = "") {
+  if (!cardsContainer) return;
   cardsContainer.innerHTML = "";
-  
+
   Object.keys(stateData).forEach((key) => {
     const position = stateData[key];
-    
+
     if (!category || position.positionType === category) {
       const card = document.createElement("div");
       card.className = "position-card";
@@ -24,8 +25,7 @@ function renderCards(category = "") {
       cardsContainer.appendChild(card);
     }
   });
-  
-  // Add event listeners to all GOAT buttons
+
   document.querySelectorAll(".goat-button").forEach((button) => {
     button.addEventListener("click", openGoatModal);
   });
@@ -34,39 +34,46 @@ function renderCards(category = "") {
 function openGoatModal(event) {
   const positionKey = event.target.getAttribute("data-position");
   const position = stateData[positionKey];
-  
   const modal = document.getElementById("goat-modal");
   const modalContent = document.querySelector(".modal-body");
-  
+
+  if (!modal || !modalContent || !position) return;
+
   modalContent.innerHTML = `
     <h2>${position.name}</h2>
     <p class="goat-label">GREATEST OF ALL TIME</p>
     <p class="goat-name">${position.goat}</p>
     <img src="${position.goatImage}" alt="${position.goat}" class="modal-image">
   `;
-  
+
   modal.style.display = "flex";
   document.body.style.overflow = "hidden";
 }
 
 function closeGoatModal() {
   const modal = document.getElementById("goat-modal");
+  if (!modal) return;
   modal.style.display = "none";
   document.body.style.overflow = "auto";
 }
 
-// Close modal when clicking outside of it
-document.addEventListener("DOMContentLoaded", function() {
+function initializeRosterPage() {
+  if (!cardsContainer || !positionFilter) return;
+
+  positionFilter.onchange = function () {
+    renderCards(this.value);
+  };
+
+  renderCards("");
+
   const modal = document.getElementById("goat-modal");
-  window.addEventListener("click", function(event) {
-    if (event.target === modal) {
-      closeGoatModal();
-    }
-  });
-});
+  if (modal) {
+    window.addEventListener("click", function (event) {
+      if (event.target === modal) {
+        closeGoatModal();
+      }
+    });
+  }
+}
 
-positionFilter.onchange = function () {
-  renderCards(this.value);
-};
-
-renderCards("");
+document.addEventListener("DOMContentLoaded", initializeRosterPage);
